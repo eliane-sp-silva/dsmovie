@@ -2,49 +2,48 @@ import axios from "axios";
 import MovieCard from "components/MovieCard";
 import Pagination from "components/Pagination";
 import { useEffect, useState } from "react";
+import { MoviePage } from "types/movie";
 import { BASE_URL } from "utils/request";
 
 function Listing() {
+
     const [pageNumber, setPageNumber] = useState(0);
 
+    //useState um estado para guardar no componente a página que foi carregada.
+    const [page, setPage] = useState<MoviePage>({
+        //objeto inicial do useState.
+        content: [],
+        last: true,
+        totalPages: 0,
+        totalElements: 0,
+        size: 12,
+        number: 0,
+        first: true,
+        numberOfElements: 0,
+        empty: true
+
+    });
+
     useEffect(() => {
-        axios.get(`${BASE_URL}/movies?size=12&page=0`)
-        .then(response => {
-            console.log(response.data);
-        });
-        
-    }, []);
+        axios.get(`${BASE_URL}/movies?size=12&page=${pageNumber}&sort=id`)
+        //sort=id = busca ordenada por id, sort=title = busca ordenada por titulo. tentar sort=score!!
+            .then(response => {
+                const data = response.data as MoviePage;
+                setPage(data);
+            });
+    }, [pageNumber]);
 
-
-    //FORMA ERRADA
-   
 
     return (
-
         <>
             <Pagination />
             <div className="container" >
                 <div className="row" >
-                    <div className="col-sm-6 col-lg-4 col-xl-3 mb-3 " >
-                        <MovieCard />
-
-                    </div>
-                    <div className="col-sm-6 col-lg-4 col-xl-3 mb-3" >
-                        <MovieCard />
-
-                    </div>
-                    <div className="col-sm-6 col-lg-4 col-xl-3 mb-3" >
-                        <MovieCard />
-
-                    </div>
-                    <div className="col-sm-6 col-lg-4 col-xl-3 mb-3" >
-                        <MovieCard />
-
-                    </div>
-                    <div className="col-sm-6 col-lg-4 col-xl-3 mb-3" >
-                        <MovieCard />
-
-                    </div>
+                    {page.content.map(movie => (
+                        <div key={movie.id} className="col-sm-6 col-lg-4 col-xl-3 mb-3 " >
+                            <MovieCard movie={movie} />
+                        </div>
+                    ))}               
                 </div>
             </div>
         </>
